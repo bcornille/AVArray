@@ -54,11 +54,6 @@ public:
 		owner(false)
 	{}
 
-	AVArray(ValueType* location, Shape new_dims) : dims(new_dims),
-		sub_dims(makeSubShape(new_dims)), storage(location),
-		element_stride(getStride(sub_dims)), owner(false)
-	{}
-
 	template<typename ...Ints>
 	AVArray(unsigned int n1, Ints... nD) : dims{n1, nD...},
 		sub_dims{nD...}, storage(new ValueType[mult(n1, nD...)]),
@@ -67,6 +62,11 @@ public:
 		static_assert(1 + sizeof...(nD) == D, "Dimension of variadic constructor is wrong.");
 		assert(mult(n1, nD...) > 0);
 	}
+
+	AVArray(ValueType* location, Shape new_dims) : dims(new_dims),
+		sub_dims(makeSubShape(new_dims)), storage(location),
+		element_stride(getStride(sub_dims)), owner(false)
+	{}
 
 	AVArray(const AVArray &other) = default;
 	AVArray(AVArray &&other) = default;
@@ -103,7 +103,7 @@ private:
 public:
 	AVArray() : dims(0), storage(nullptr), owner(false) {}
 
-	AVArray(unsigned int n1) : dims(n1), storage(new ValueType[n1]), owner(true)
+	AVArray(unsigned int n1) : dims{n1}, storage(new ValueType[n1]), owner(true)
 	{
 		assert(n1 > 0);
 	}
