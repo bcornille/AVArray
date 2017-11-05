@@ -1,15 +1,16 @@
 #include <cassert>
-#include <iterator>
 #include <type_traits>
 #include <array>
 
 #ifndef AV_ARRAY_HPP
 #define AV_ARRAY_HPP
 
-template<typename Arg, typename std::enable_if<std::is_integral<Arg>::value>::type * = nullptr>
+template<typename Arg,
+	typename std::enable_if<std::is_integral<Arg>::value>::type * = nullptr>
 constexpr unsigned int mult(Arg n1, Arg n2) { return n1*n2; }
 
-template<typename Arg, typename ...Ts, typename std::enable_if<std::is_integral<Arg>::value>::type * = nullptr>
+template<typename Arg, typename ...Ts,
+	typename std::enable_if<std::is_integral<Arg>::value>::type * = nullptr>
 constexpr unsigned int mult(Arg n1, Ts... rest)
 {
 	return n1*mult(rest...);
@@ -30,7 +31,7 @@ private:
 	unsigned int element_stride;
 	bool owner;
 
-	inline SubShape makeSubShape(Shape in_shape)
+	inline SubShape makeSubShape(Shape in_shape) const
 	{
 		SubShape out_shape;
 		for (unsigned int i = 0; i < in_shape.size() - 1; ++i)
@@ -40,7 +41,7 @@ private:
 		return out_shape;
 	}
 
-	inline unsigned int getStride(SubShape in_shape)
+	inline unsigned int getStride(SubShape in_shape) const
 	{
 		unsigned int stride = 1;
 		for(auto&& i : in_shape) {
@@ -59,7 +60,8 @@ public:
 		sub_dims{nD...}, storage(new ValueType[mult(n1, nD...)]),
 		element_stride(mult(1u, nD...)), owner(true)
 	{
-		static_assert(1 + sizeof...(nD) == D, "Dimension of variadic constructor is wrong.");
+		static_assert(1 + sizeof...(nD) == D,
+			"Dimension of variadic constructor is wrong.");
 		assert(mult(n1, nD...) > 0);
 	}
 
@@ -85,6 +87,46 @@ public:
 		assert(i < dims[0]);
 		return AVArray<T, D - 1>(storage + i*element_stride, sub_dims);
 	}
+
+	inline const ElementType operator[](unsigned int i) const
+	{
+		assert(i < dims[0]);
+		return AVArray<T, D - 1>(storage + i*element_stride, sub_dims);
+	}
+
+	template<typename ...Ints>
+	inline ValueType& operator()(Ints... nD)
+	{
+		static_assert(sizeof...(nD) == D,
+			"Dimension of variadic accessor is wrong.");
+		Shape indices{nD...};
+		assert(indices[0] < dims[0]);
+		unsigned int offset = indices[0];
+		for (int i = 1; i < D; ++i)
+		{
+			assert(indices[i] < dims[i]);
+			offset = offset*dims[i] + indices[i];
+		}
+		return storage[offset];
+	}
+
+	template<typename ...Ints>
+	inline const ValueType& operator()(Ints... nD) const
+	{
+		static_assert(sizeof...(nD) == D,
+			"Dimension of variadic accessor is wrong.");
+		Shape indices{nD...};
+		assert(indices[0] < dims[0]);
+		unsigned int offset = indices[0];
+		for (int i = 1; i < D; ++i)
+		{
+			assert(indices[i] < dims[i]);
+			offset = offset*dims[i] + indices[i];
+		}
+		return storage[offset];
+	}
+
+	inline Shape shape() const { return dims; }
 };
 
 template<typename T>
@@ -129,6 +171,26 @@ public:
 		assert(i < dims[0]);
 		return storage[i];
 	}
+
+	inline const ElementType operator[](unsigned int i) const
+	{
+		assert(i < dims[0]);
+		return storage[i];
+	}
+
+	inline ElementType operator()(unsigned int i)
+	{
+		assert(i < dims[0]);
+		return storage[i];
+	}
+
+	inline const ElementType operator()(unsigned int i) const
+	{
+		assert(i < dims[0]);
+		return storage[i];
+	}
+
+	inline Shape shape() const { return dims; }
 };
 
 #endif // AV_ARRAY_HPP
