@@ -1,3 +1,4 @@
 [submodule "test/perf/googlebenchmark"]
 	path = test/perf/googlebenchmark
 	url = https://github.com/google/benchmark.git
+	ignore = dirty
