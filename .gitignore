@@ -32,4 +32,4 @@
 *.app
 
 # Build Directory
-build
+build*
