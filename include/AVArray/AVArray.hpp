@@ -134,6 +134,7 @@ class AVArray<T, 1>
 {
 	typedef T ValueType;
 	typedef T& ElementType;
+	typedef const T& ConstElementType;
 	typedef std::array<unsigned int, 1> Shape;
 
 private:
@@ -143,7 +144,7 @@ private:
 	bool owner;
 
 public:
-	AVArray() : dims(0), storage(nullptr), owner(false) {}
+	AVArray() : dims{0}, storage(nullptr), owner(false) {}
 
 	AVArray(unsigned int n1) : dims{n1}, storage(new ValueType[n1]), owner(true)
 	{
@@ -172,7 +173,7 @@ public:
 		return storage[i];
 	}
 
-	inline const ElementType operator[](unsigned int i) const
+	inline ConstElementType operator[](unsigned int i) const
 	{
 		assert(i < dims[0]);
 		return storage[i];
@@ -184,7 +185,7 @@ public:
 		return storage[i];
 	}
 
-	inline const ElementType operator()(unsigned int i) const
+	inline ConstElementType operator()(unsigned int i) const
 	{
 		assert(i < dims[0]);
 		return storage[i];
