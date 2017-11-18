@@ -1,30 +1,40 @@
 #include "AVArray/AVArray.hpp"
 #include <iostream>
+#include <cstdlib>
 
 int main(int argc, char const *argv[])
 {
-	AVArray<double, 2> mat_a(1024u, 1024u), mat_b(1024u, 1024u), mat_c(1024u, 1024u);
+	unsigned int N = 32; //std::atoi(argv[1]);
+	constexpr static std::align_val_t ALIGN = static_cast<std::align_val_t>(8*sizeof(double));
 
-	for (unsigned int i = 0; i < 1024; ++i)
+    double* mat_a = new(ALIGN) double[N*N];
+	double* mat_b = new(ALIGN) double[N*N];
+	double* mat_c = new(ALIGN) double[N*N];
+
+	for (unsigned int i = 0; i < N; ++i)
 	{
-		for (unsigned int j = 0; j < 1024; ++j)
+		for (unsigned int j = 0; j < N; ++j)
 		{
-			mat_a(i, j) = i;
-			mat_b(i, j) = j;
-			mat_c(i, j) = 0.0;
+			mat_a[i*N+j] = i;
+			mat_b[i*N+j] = j;
+			mat_c[i*N+j] = 0.0;
 		}
 	}
 
-	for (unsigned int i = 0; i < 1024; ++i)
+	for (unsigned int i = 0; i < N; ++i)
 	{
-		for (unsigned int k = 0; k < 1024; ++k)
+		for (unsigned int k = 0; k < N; ++k)
 		{
-			for (unsigned int j = 0; j < 1024; ++j)
+			for (unsigned int j = 0; j < N; ++j)
 			{
-				mat_c(i, j) += mat_a(i, k)*mat_b(k, j);
+				mat_c[i*N+j] += mat_a[i*N+k]*mat_b[k*N+j];
 			}
 		}
 	}
+
+	delete[] mat_a;
+	delete[] mat_b;
+	delete[] mat_c;
 
 	return 0;
 }
