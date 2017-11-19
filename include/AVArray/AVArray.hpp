@@ -24,7 +24,7 @@ class AVArray
 	typedef std::array<unsigned int, D> Shape;
 	typedef std::array<unsigned int, D - 1> SubShape;
 
-private:
+protected:
 	Shape dims;
 	SubShape sub_dims;
 	ValueType* storage;
@@ -50,6 +50,15 @@ private:
 		return stride;
 	}
 
+	inline unsigned int getSize(Shape in_shape) const
+	{
+		unsigned int stride = 1;
+		for(auto&& i : in_shape) {
+			stride *= i;
+		}
+		return stride;
+	}
+
 public:
 	AVArray() : dims{0}, sub_dims{0}, storage(nullptr), element_stride(0),
 		owner(false)
@@ -65,16 +74,55 @@ public:
 		assert(mult(n1, nD...) > 0);
 	}
 
+	AVArray(Shape new_dims) : dims(new_dims), sub_dims(makeSubShape(new_dims)),
+		storage(new ValueType[getSize(new_dims)]),
+		element_stride(getStride(sub_dims)), owner(true)
+	{}
+
 	AVArray(ValueType* location, Shape new_dims) : dims(new_dims),
 		sub_dims(makeSubShape(new_dims)), storage(location),
 		element_stride(getStride(sub_dims)), owner(false)
 	{}
 
-	AVArray(const AVArray &other) = default;
-	AVArray(AVArray &&other) = default;
-	AVArray& operator=(const AVArray &other) = default;
-	AVArray& operator=(AVArray &&other) = default;
-	~AVArray()
+	AVArray(const AVArray &other) : dims(other.dims), sub_dims(other.sub_dims),
+		storage(new ValueType[getSize(other.dims)]),
+		element_stride(other.element_stride), owner(true)
+	{
+		for (int i = 0; i < getSize(dims); ++i)
+		{
+			storage[i] = other.storage[i];
+		}
+	}
+
+	AVArray(AVArray &&other) : dims(other.dims), sub_dims(other.sub_dims),
+		storage(other.storage), element_stride(other.element_stride), owner(other.owner)
+	{
+		other.owner = false;
+	}
+
+	AVArray& operator=(const AVArray &other)
+	{
+		AVArray temp(other);
+		*this = std::move(temp);
+		return *this;
+	}
+
+	AVArray& operator=(AVArray &&other)
+	{
+		if (owner)
+		{
+			delete[] storage;
+		}
+		dims = other.dims;
+		sub_dims = other.sub_dims;
+		storage = other.storage;
+		element_stride = other.element_stride;
+		owner = other.owner;
+		other.owner = false;
+		return *this;
+	}
+
+	virtual ~AVArray() noexcept
 	{
 		if (owner)
 		{
@@ -137,10 +185,10 @@ class AVArray<T, 1>
 	typedef const T& ConstElementType;
 	typedef std::array<unsigned int, 1> Shape;
 
-private:
+protected:
 	Shape dims;
 	ValueType* storage;
-	const unsigned int element_stride = 1;
+	unsigned int element_stride = 1;
 	bool owner;
 
 public:
@@ -155,11 +203,48 @@ public:
 		storage(location), element_stride(1), owner(false)
 	{}
 
-	AVArray(const AVArray &other) = default;
-	AVArray(AVArray &&other) = default;
-	AVArray& operator=(const AVArray &other) = default;
-	AVArray& operator=(AVArray &&other) = default;
-	~AVArray()
+	AVArray(Shape new_dims) : dims(new_dims),
+		storage(new ValueType[new_dims[0]]), element_stride(1), owner(true)
+	{}
+
+	AVArray(const AVArray &other) : dims(other.dims),
+		storage(new ValueType[other.dims[0]]),
+		element_stride(other.element_stride), owner(true)
+	{
+		for (int i = 0; i < dims[0]; ++i)
+		{
+			storage[i] = other.storage[i];
+		}
+	}
+
+	AVArray(AVArray &&other) : dims(other.dims),
+		storage(other.storage), element_stride(other.element_stride), owner(other.owner)
+	{
+		other.owner = false;
+	}
+
+	AVArray& operator=(const AVArray &other)
+	{
+		AVArray temp(other);
+		*this = std::move(temp);
+		return this;
+	}
+
+	AVArray& operator=(AVArray &&other)
+	{
+		if (owner)
+		{
+			delete[] storage;
+		}
+		dims = other.dims;
+		storage = other.storage;
+		element_stride = other.element_stride;
+		owner = other.owner;
+		other.owner = false;
+		return *this;
+	}
+
+	virtual ~AVArray() noexcept
 	{
 		if (owner)
 		{

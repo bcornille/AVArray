@@ -1,5 +1,5 @@
 #include <benchmark/benchmark.h>
-#include <AVArray/AVArray.hpp>
+#include <AVArray/Tensor.hpp>
 
 static void pointer(benchmark::State& state)
 {
@@ -96,5 +96,26 @@ static void parentheses_operator(benchmark::State& state)
 	}
 }
 BENCHMARK(parentheses_operator)->Range(8, 1<<8);
+
+static void tensor(benchmark::State& state)
+{
+	for(auto _ : state) {
+		unsigned int N = state.range(0);
+		Tensor<double, 2> mat_a(N, N), mat_b(N, N), mat_c(N, N);
+
+		for (unsigned int i = 0; i < N; ++i)
+		{
+			for (unsigned int j = 0; j < N; ++j)
+			{
+				mat_a[i][j] = i;
+				mat_b[i][j] = j;
+				mat_c[i][j] = 0.0;
+			}
+		}
+
+		mat_c = mat_a*mat_b;
+	}
+}
+BENCHMARK(tensor)->Range(8, 1<<8);
 
 BENCHMARK_MAIN();
