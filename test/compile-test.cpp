@@ -4,31 +4,43 @@
 
 int main(int argc, char const *argv[])
 {
-	unsigned int N = 4; //std::atoi(argv[1]);
+	int N = 2; //std::atoi(argv[1]);
 	// constexpr static std::align_val_t ALIGN = static_cast<std::align_val_t>(8*sizeof(double));
 
-    Tensor<double, 2> mat_a(N, N), mat_b(N, N), mat_c(N, N), mat_d(N, N);
+    Tensor<double, 3> mat_a(N, N, N), mat_b(N, N, N);
+    Tensor<double, 4> mat_c(N, N, N, N);
 
-	for (unsigned int i = 0; i < N; ++i)
+	for (int i = 0; i < N; ++i)
 	{
-		for (unsigned int j = 0; j < N; ++j)
+		for (int j = 0; j < N; ++j)
 		{
-			mat_a[i][j] = i;
-			mat_b[i][j] = j;
-			mat_c[i][j] = 0.0;
-			mat_d[i][j] = 0.0;
+			for (int k = 0; k < N; ++k)
+			{
+				mat_a[i][j][k] = i*j;
+				mat_b(i, j, k) = k;
+				for (int l = 0; l < N; ++l)
+				{
+					mat_c[i][j][k][l] = 0.0;
+				}
+			}
 		}
 	}
 
-	mat_c = mat_a*mat_b;
+	// mat_c = mat_a*mat_b;
 
-	for (unsigned int i = 0; i < N; ++i)
+	for (int i = 0; i < N; ++i)
 	{
-		for (unsigned int k = 0; k < N; ++k)
+		for (int j = 0; j < N; ++j)
 		{
-			for (unsigned int j = 0; j < N; ++j)
+			for (int m = 0; m < N; ++m)
 			{
-				mat_d[i][j] += mat_a[i][k]*mat_b[k][j];
+				for (int k = 0; k < N; ++k)
+				{
+					for (int l = 0; l < N; ++l)
+					{
+						mat_c[i][j][k][l] += mat_a[i][j][m]*mat_b[m][k][l];
+					}
+				}
 			}
 		}
 	}
@@ -37,11 +49,13 @@ int main(int argc, char const *argv[])
 	{
 		for (int j = 0; j < N; ++j)
 		{
-			if (mat_c[i][j] != mat_d[i][j])
+			for (int k = 0; k < N; ++k)
 			{
-				std::cout << "(i, j): (" << i << ", " << j << ")" << std::endl;
-				std::cout << "Matrix C: " << mat_c[i][j] << std::endl;
-				std::cout << "Matrix D: " << mat_d[i][j] << std::endl;
+				for (int l = 0; l < N; ++l)
+				{
+					std::cout << "C(" << i << ", " << j << ", " << k << ", "
+						<< l << "): " << mat_c[i][j][k][l] << std::endl;
+				}
 			}
 		}
 	}

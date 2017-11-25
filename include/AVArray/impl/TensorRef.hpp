@@ -1,66 +1,38 @@
 #include "TensorBase.hpp"
 #include <cassert>
+#include <array>
+#include <algorithm>
+#include <utility>
 
 #ifndef TENSOR_REF_HPP
 #define TENSOR_REF_HPP
 
 template<typename T, int D>
 class TensorRef : TensorBase<TensorRef<T, D>, D> {
-	using value_type = T;
+	typedef T value_type;
 	typedef TensorRef<T, D - 1> element_type;
+	typedef std::array<int, D> shape_type;
+	typedef std::array<int, D - 1> sub_shape_type;
 
 private:
 	value_type* storage_ref;
-	int& dims[D];
+	shape_type dims;
 
 	constexpr int getStride() const
 	{
 		int stride = 1;
-		for(const int& i : dims) {
-			stride *= i;
+		for (int i = 1; i < D; ++i)
+		{
+			stride *= dims[i];
 		}
 		return stride;
 	}
 
-public:
-	TensorRef() = delete;
-	TensorRef(const TensorRef&) = delete;
-	TensorRef(TensorRef&&) = delete;
-	TensorRef& operator=(const TensorRef&) = delete;
-	TensorRef& operator=(TensorRef&&) = delete;
-	~TensorRef() noexcept = default;
-
-	TensorRef(value_type* location, int (&in_dims)[D]) : storage_ref(location),
-		dims(in_dims)
-	{}
-
-	inline element_type operator[](int i)
+	sub_shape_type makeSubShape() const
 	{
-		assert(i < dims[0]);
-		return element_type(storage_ref + i*getStride(),
-			reinterpret_cast<int(&)[D-1]>(dims[1]));
-	}
-
-	inline const element_type operator[](int i) const
-	{
-		assert(i < dims[0]);
-		return element_type(storage_ref + i*getStride(),
-			reinterpret_cast<int(&)[D-1]>(dims[1]));
-	}
-};
-
-template<typename T>
-class TensorRef<T, 2> : TensorBase<TensorRef<T, 2>, 2> {
-	using value_type = T;
-	typedef TensorRef<T, 1> element_type;
-
-private:
-	value_type* storage_ref;
-	int& dims[2];
-
-	constexpr int getStride() const
-	{
-		return dims[0]*dims[1];
+		sub_shape_type sub_shape;
+		std::copy(dims.cbegin() + 1, dims.cend(), sub_shape.begin());
+		return sub_shape;
 	}
 
 public:
@@ -71,54 +43,53 @@ public:
 	TensorRef& operator=(TensorRef&&) = default;
 	~TensorRef() = default;
 
-	TensorRef(value_type* location, int (&in_dims)[2]) : storage_ref(location),
-		dims(in_dims)
+	TensorRef(value_type* location, shape_type in_dims) : storage_ref(location),
+		dims(std::forward<shape_type>(in_dims))
 	{}
 
 	inline element_type operator[](int i)
 	{
 		assert(i < dims[0]);
-		return element_type(storage_ref + i*getStride(), dims[1]);
+		return element_type(storage_ref + i*getStride(), makeSubShape());
 	}
 
-	inline const_element_type operator[](int i) const
+	inline const element_type operator[](int i) const
 	{
 		assert(i < dims[0]);
-		return element_type(storage_ref + i*getStride(), dims[1]);
+		return element_type(storage_ref + i*getStride(), makeSubShape());
 	}
 };
 
 template<typename T>
 class TensorRef<T, 1> : TensorBase<TensorRef<T, 1>, 1> {
-	using value_type = T;
-	typedef &value_type element_type;
-	typedef const &value_type const_element_type;
+	typedef T value_type;
+	typedef std::array<int, 1> shape_type;
 
 private:
 	value_type* storage_ref;
-	int dims;
+	shape_type dims;
 
 public:
 	TensorRef() = delete;
-	TensorRef(const TensorRef&) = delete;
-	TensorRef(TensorRef&&) = delete;
-	TensorRef& operator=(const TensorRef&) = delete;
-	TensorRef& operator=(TensorRef&&) = delete;
-	~TensorRef() noexcept = default;
+	TensorRef(const TensorRef&) = default;
+	TensorRef(TensorRef&&) = default;
+	TensorRef& operator=(const TensorRef&) = default;
+	TensorRef& operator=(TensorRef&&) = default;
+	~TensorRef() = default;
 
-	TensorRef(value_type* location, int in_dims) : storage_ref(location),
-		dims(in_dims)
+	TensorRef(value_type* location, shape_type in_dims) : storage_ref(location),
+		dims(std::forward<shape_type>(in_dims))
 	{}
 
-	inline element_type operator[](int i)
+	inline value_type& operator[](int i)
 	{
-		assert(i < dims);
+		assert(i < dims[0]);
 		return storage_ref[i];
 	}
 
-	inline const_element_type operator[](int i) const
+	inline const value_type& operator[](int i) const
 	{
-		assert(i < dims);
+		assert(i < dims[0]);
 		return storage_ref[i];
 	}
 };

@@ -5,6 +5,9 @@
 #ifndef AV_ARRAY_HPP
 #define AV_ARRAY_HPP
 
+#ifndef MULT
+#define MULT
+
 template<typename Arg,
 	typename std::enable_if<std::is_integral<Arg>::value>::type * = nullptr>
 constexpr unsigned int mult(Arg n1, Arg n2) { return n1*n2; }
@@ -15,6 +18,8 @@ constexpr unsigned int mult(Arg n1, Ts... rest)
 {
 	return n1*mult(rest...);
 }
+
+#endif // MULT
 
 template<typename T, unsigned int D>
 class AVArray
