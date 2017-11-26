@@ -21,7 +21,8 @@ constexpr int mult(Arg n1, Ts... rest)
 #endif // MULT
 
 template<typename T, int D>
-class Tensor : TensorBase<Tensor<T, D>, D> {
+class Tensor : public TensorBase<Tensor<T, D>, D> {
+public:
 	typedef T value_type;
 	typedef TensorRef<T, D - 1> element_type;
 	typedef std::array<int, D> shape_type;
@@ -31,6 +32,7 @@ private:
 	value_type* storage;
 	shape_type dims;
 
+public:
 	constexpr int getStride() const
 	{
 		int stride = 1;
@@ -68,6 +70,10 @@ private:
 	}
 
 public:
+	using TensorBase<Tensor<T, D>, D>::operator=;
+	using TensorBase<Tensor<T, D>, D>::operator+;
+
+
 	Tensor() : storage(nullptr), dims{0} {}
 
 	template<typename ...Ints>
@@ -160,10 +166,23 @@ public:
 		}
 		return storage[offset];
 	}
+
+	inline value_type& data(int i)
+	{
+		assert(i < getSize());
+		return storage[i];
+	}
+
+	inline const value_type& data(int i) const
+	{
+		assert(i < getSize());
+		return storage[i];
+	}
 };
 
 template<typename T>
-class Tensor<T, 1> : TensorBase<Tensor<T, 1>, 1> {
+class Tensor<T, 1> : public TensorBase<Tensor<T, 1>, 1> {
+public:
 	typedef T value_type;
 	typedef std::array<int, 1> shape_type;
 

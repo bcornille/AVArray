@@ -8,7 +8,8 @@
 #define TENSOR_REF_HPP
 
 template<typename T, int D>
-class TensorRef : TensorBase<TensorRef<T, D>, D> {
+class TensorRef : public TensorBase<TensorRef<T, D>, D> {
+public:
 	typedef T value_type;
 	typedef TensorRef<T, D - 1> element_type;
 	typedef std::array<int, D> shape_type;
@@ -61,7 +62,8 @@ public:
 };
 
 template<typename T>
-class TensorRef<T, 1> : TensorBase<TensorRef<T, 1>, 1> {
+class TensorRef<T, 1> : public TensorBase<TensorRef<T, 1>, 1> {
+public:
 	typedef T value_type;
 	typedef std::array<int, 1> shape_type;
 
