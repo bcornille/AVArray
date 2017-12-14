@@ -43,7 +43,7 @@ public:
 		return stride;
 	}
 
-	constexpr int getSize(shape_type& in_dims) const
+	constexpr int getSize(const shape_type& in_dims) const
 	{
 		int size = 1;
 		for(const int& i : in_dims) {
@@ -62,6 +62,11 @@ public:
 		return size;
 	}
 
+	constexpr int getLeadingDim() const
+	{
+		return dims[0];
+	}
+
 	sub_shape_type makeSubShape() const
 	{
 		sub_shape_type sub_shape;
@@ -72,7 +77,6 @@ public:
 public:
 	using TensorBase<Tensor<T, D>, D>::operator=;
 	using TensorBase<Tensor<T, D>, D>::operator+;
-
 
 	Tensor() : storage(nullptr), dims{0} {}
 
@@ -177,6 +181,16 @@ public:
 	{
 		assert(i < getSize());
 		return storage[i];
+	}
+
+	inline TensorRef<T, D> ref()
+	{
+		return TensorRef<T, D>(storage, dims);
+	}
+
+	inline const TensorRef<T, D> ref() const
+	{
+		return TensorRef<T, D>(storage, dims);
 	}
 };
 

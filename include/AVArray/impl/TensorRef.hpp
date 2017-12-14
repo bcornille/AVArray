@@ -19,6 +19,7 @@ private:
 	value_type* storage_ref;
 	shape_type dims;
 
+public:
 	constexpr int getStride() const
 	{
 		int stride = 1;
@@ -29,6 +30,11 @@ private:
 		return stride;
 	}
 
+	constexpr int getLeadingDim() const
+	{
+		return dims[0];
+	}
+
 	sub_shape_type makeSubShape() const
 	{
 		sub_shape_type sub_shape;
@@ -37,10 +43,13 @@ private:
 	}
 
 public:
+	using TensorBase<TensorRef<T, D>, D>::operator=;
+	using TensorBase<TensorRef<T, D>, D>::operator+;
+
 	TensorRef() = delete;
-	TensorRef(const TensorRef&) = default;
+	TensorRef(const TensorRef&) = delete;
 	TensorRef(TensorRef&&) = default;
-	TensorRef& operator=(const TensorRef&) = default;
+	TensorRef& operator=(const TensorRef&) = delete;
 	TensorRef& operator=(TensorRef&&) = default;
 	~TensorRef() = default;
 
@@ -72,6 +81,15 @@ private:
 	shape_type dims;
 
 public:
+	constexpr int getLeadingDim() const
+	{
+		return dims[0];
+	}
+
+	using TensorBase<TensorRef<T, 1>, 1>::operator=;
+	using TensorBase<TensorRef<T, 1>, 1>::operator+;
+
+
 	TensorRef() = delete;
 	TensorRef(const TensorRef&) = default;
 	TensorRef(TensorRef&&) = default;

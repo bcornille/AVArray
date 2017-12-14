@@ -1,4 +1,5 @@
 #include "TensorET_forward.hpp"
+#include <cassert>
 
 #ifndef TENSOR_BASE_HPP
 #define TENSOR_BASE_HPP
@@ -7,19 +8,21 @@ template<typename Derived, int D>
 class TensorBase {
 public:
 	template<typename OtherDerived>
-	Derived& operator=(const TensorBase<OtherDerived, D> &other)
+	Derived& operator=(const OtherDerived &other)
 	{
-		TensorEvaluator<TensorAssign<Derived, OtherDerived, D>, D>
-			evaluator(const_derived(), other.derived());
-		evaluator.assign();
+		assert(derived().getLeadingDim() == other.getLeadingDim());
+		for (int i = 0; i < derived().getLeadingDim(); ++i)
+		{
+			derived()[i] = other[i];
+		}
 		return derived();
 	}
 
 	template<typename OtherDerived>
 	TensorSum<Derived, OtherDerived, D>
-	operator+(const TensorBase<OtherDerived, D> &other)
+	operator+(const OtherDerived &other)
 	{
-		return TensorSum<Derived, OtherDerived, D>(const_derived(), other.derived());
+		return TensorSum<Derived, OtherDerived, D>(derived(), other);
 	}
 
 public:

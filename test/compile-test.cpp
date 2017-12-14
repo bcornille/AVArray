@@ -45,6 +45,8 @@ int main(int argc, char const *argv[])
 			{
 				std::cout << "C(" << i << ", " << j << ", " << k << ", "
 					<< "): " << mat_c[i][j][k] << std::endl;
+				std::cout << "D(" << i << ", " << j << ", " << k << ", "
+					<< "): " << mat_d[i][j][k] << std::endl;
 			}
 		}
 	}

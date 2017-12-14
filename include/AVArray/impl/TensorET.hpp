@@ -1,4 +1,5 @@
 #include "Tensor.hpp"
+#include <cassert>
 
 #ifndef TENSOR_ET_HPP
 #define TENSOR_ET_HPP
@@ -51,20 +52,104 @@ template<typename T_A, typename T_B, int D>
 class TensorSum : public TensorBase<TensorSum<T_A, T_B, D>, D>
 {
 public:
-	using value_type = typename TensorSum<T_A, T_B, D - 1>::value_type;
-	using element_type = TensorSum<T_A, T_B, D - 1>;
+	// using value_type = typename TensorSum<T_A, T_B, D - 1>::value_type;
 	using element_type_A = typename T_A::element_type;
 	using element_type_B = typename T_B::element_type;
+	using element_type = TensorSum<element_type_A, element_type_B, D - 1>;
 public:
-	const T_A &A;
-	const T_B &B;
+	const T_A A;
+	const T_B B;
 
 public:
-	TensorSum(const T_A &_A, const T_B &_B) : A(_A), B(_B) {}
+	TensorSum(T_A _A, T_B _B) : A(std::forward<T_A>(_A)), B(std::forward<T_B>(_B))
+	{}
 
 	TensorSum<element_type_A, element_type_B, D - 1> operator[](int i)
 	{
 		return TensorSum<element_type_A, element_type_B, D - 1>(A[i], B[i]);
+	}
+
+	const TensorSum<element_type_A, element_type_B, D - 1> operator[](int i) const
+	{
+		return TensorSum<element_type_A, element_type_B, D - 1>(A[i], B[i]);
+	}
+
+	constexpr int getLeadingDim() const
+	{
+		assert(A.getLeadingDim() == B.getLeadingDim());
+		return A.getLeadingDim();
+	}
+
+};
+
+// template<typename T_A, int D>
+// template<typename T>
+// class TensorSum<T_A, Tensor<T, D>, D> :
+// 	public TensorBase<TensorSum<T_A, Tensor<T, D>, D>, D>
+// {
+// public:
+// 	// using value_type = typename TensorSum<T_A, T_B, D - 1>::value_type;
+// 	using element_type_A = typename T_A::element_type;
+// 	using element_type_B = typename Tensor<T, D>::element_type;
+// 	using element_type = TensorSum<element_type_A, element_type_B, D - 1>;
+// public:
+// 	const T_A A;
+// 	const TensorRef<T, D> B;
+
+// public:
+// 	TensorSum(T_A _A, const Tensor<T, D> &_B) : A(std::forward<T_A>(_A)), B(_B.ref())
+// 	{}
+
+// 	TensorSum<element_type_A, element_type_B, D - 1> operator[](int i)
+// 	{
+// 		return TensorSum<element_type_A, element_type_B, D - 1>(A[i], B[i]);
+// 	}
+
+// 	const TensorSum<element_type_A, element_type_B, D - 1> operator[](int i) const
+// 	{
+// 		return TensorSum<element_type_A, element_type_B, D - 1>(A[i], B[i]);
+// 	}
+
+// 	constexpr int getLeadingDim() const
+// 	{
+// 		assert(A.getLeadingDim() == B.getLeadingDim());
+// 		return A.getLeadingDim();
+// 	}
+
+// };
+
+template<>
+template<typename T, int D>
+class TensorSum<Tensor<T, D>, Tensor<T, D>, D> :
+	public TensorBase<TensorSum<Tensor<T, D>, Tensor<T, D>, D>, D>
+{
+public:
+	// using value_type = typename TensorSum<Tensor<T, D>, Tensor<T, D>, D - 1>::value_type;
+	using element_type_A = typename Tensor<T, D>::element_type;
+	using element_type_B = typename Tensor<T, D>::element_type;
+	using element_type = TensorSum<element_type_A, element_type_B, D - 1>;
+public:
+	const TensorRef<T, D> A;
+	const TensorRef<T, D> B;
+
+public:
+	TensorSum(const Tensor<T, D> &_A, const Tensor<T, D> &_B) : A(_A.ref()), B(_B.ref())
+	{}
+
+	TensorSum<element_type_A, element_type_B, D - 1> operator[](int i)
+	{
+		return TensorSum<element_type_A, element_type_B, D - 1>(A[i], B[i]);
+	}
+
+	const TensorSum<element_type_A, element_type_B, D - 1> operator[](int i) const
+	{
+		return TensorSum<element_type_A, element_type_B, D - 1>(A[i], B[i]);
+	}
+
+	constexpr int getLeadingDim() const
+	{
+		assert(A.getLeadingDim() == B.getLeadingDim());
+		return A.getLeadingDim();
 	}
 
 };
@@ -75,13 +160,93 @@ class TensorSum<T_A, T_B, 1> : public TensorBase<TensorSum<T_A, T_B, 1>, 1>
 public:
 	using value_type = typename T_A::value_type;
 public:
-	const T_A &A;
-	const T_B &B;
+	const T_A A;
+	const T_B B;
 
 public:
+	TensorSum(T_A _A, T_B _B) : A(std::forward<T_A>(_A)), B(std::forward<T_B>(_B))
+	{}
+
 	value_type operator[](int i)
 	{
 		return A[i] + B[i];
+	}
+
+	value_type operator[](int i) const
+	{
+		return A[i] + B[i];
+	}
+
+	constexpr int getLeadingDim() const
+	{
+		assert(A.getLeadingDim() == B.getLeadingDim());
+		return A.getLeadingDim();
+	}
+
+};
+
+// template<typename T_A>
+// template<typename T>
+// class TensorSum<T_A, Tensor<T, 1>, 1> :
+// 	public TensorBase<TensorSum<T_A, Tensor<T, 1>, 1>, 1>
+// {
+// public:
+// 	using value_type = typename T_A::value_type;
+// public:
+// 	const T_A A;
+// 	const TensorRef<T, 1> B;
+
+// public:
+// 	TensorSum(T_A _A, const Tensor<T, 1> &_B) : A(std::forward<T_A>(_A)), B(_B.ref())
+// 	{}
+
+// 	value_type operator[](int i)
+// 	{
+// 		return A[i] + B[i];
+// 	}
+
+// 	value_type operator[](int i) const
+// 	{
+// 		return A[i] + B[i];
+// 	}
+
+// 	constexpr int getLeadingDim() const
+// 	{
+// 		assert(A.getLeadingDim() == B.getLeadingDim());
+// 		return A.getLeadingDim();
+// 	}
+
+// };
+
+template<>
+template<typename T>
+class TensorSum<Tensor<T, 1>, Tensor<T, 1>, 1> :
+	public TensorBase<TensorSum<Tensor<T, 1>, Tensor<T, 1>, 1>, 1>
+{
+public:
+	using value_type = typename Tensor<T, 1>::value_type;
+public:
+	const TensorRef<T, 1> A;
+	const TensorRef<T, 1> B;
+
+public:
+	TensorSum(const Tensor<T, 1> &_A, const Tensor<T, 1> &_B) : A(_A.ref()), B(_B.ref())
+	{}
+
+	value_type operator[](int i)
+	{
+		return A[i] + B[i];
+	}
+
+	value_type operator[](int i) const
+	{
+		return A[i] + B[i];
+	}
+
+	constexpr int getLeadingDim() const
+	{
+		assert(A.getLeadingDim() == B.getLeadingDim());
+		return A.getLeadingDim();
 	}
 
 };
@@ -131,7 +296,7 @@ protected:
 
 public:
 	TensorEvaluator<TensorAssign<Destination, Source, D>, D>(
-		const Destination &_dest, const Source &_source) :
+		Destination &_dest, const Source &_source) :
 		evalDest(_dest), evalSource(_source)
 	{}
 
