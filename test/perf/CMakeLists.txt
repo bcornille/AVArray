@@ -1,11 +1,9 @@
 add_subdirectory(googlebenchmark)
 
-include_directories(${PROJECT_SOURCE_DIR}/include googlebenchmark/include)
+include_directories(${PROJECT_SOURCE_DIR}/include googlebenchmark/include ~/usr/include)
 
-add_executable(looping looping.cpp ${PROJECT_SOURCE_DIR}/include/AVArray/AVArray.hpp googlebenchmark/include/benchmark/benchmark.h)
-add_executable(matmult matmult.cpp ${PROJECT_SOURCE_DIR}/include/AVArray/AVArray.hpp googlebenchmark/include/benchmark/benchmark.h)
-
-foreach(target looping matmult)
+foreach(target looping matmult sum)
+	add_executable(${target} ${target}.cpp ${PROJECT_SOURCE_DIR}/include/AVArray/AVArray.hpp googlebenchmark/include/benchmark/benchmark.h)
 	if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 		target_compile_options(${target} PRIVATE -fopt-info-vec -fno-omit-frame-pointer -march=native)
 	elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Cray")
@@ -19,7 +17,8 @@ endforeach(target)
 
 link_directories(googlebenchmark)
 target_link_libraries(looping benchmark)
+target_link_libraries(sum benchmark)
 target_link_libraries(matmult benchmark)
 
-add_custom_target(perftest DEPENDS benchmark looping matmult)
-add_custom_command(TARGET perftest POST_BUILD COMMAND looping COMMAND matmult)
+add_custom_target(perftest DEPENDS benchmark looping sum matmult)
+add_custom_command(TARGET perftest POST_BUILD COMMAND looping COMMAND sum COMMAND matmult)

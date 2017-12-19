@@ -70,11 +70,45 @@ public:
 		element_stride(getStride(sub_dims)), owner(false)
 	{}
 
-	AVArray(const AVArray &other) = default;
-	AVArray(AVArray &&other) = default;
-	AVArray& operator=(const AVArray &other) = default;
-	AVArray& operator=(AVArray &&other) = default;
-	~AVArray()
+	AVArray(const AVArray &other) : dims(other.dims), sub_dims(other.sub_dims),
+		storage(new ValueType[getSize(other.dims)]),
+		element_stride(other.element_stride), owner(true)
+	{
+		for (int i = 0; i < getSize(dims); ++i)
+		{
+			storage[i] = other.storage[i];
+		}
+	}
+
+	AVArray(AVArray &&other) : dims(other.dims), sub_dims(other.sub_dims),
+		storage(other.storage), element_stride(other.element_stride), owner(other.owner)
+	{
+		other.owner = false;
+	}
+
+	AVArray& operator=(const AVArray &other)
+	{
+		AVArray temp(other);
+		*this = std::move(temp);
+		return *this;
+	}
+
+	AVArray& operator=(AVArray &&other)
+	{
+		if (owner)
+		{
+			delete[] storage;
+		}
+		dims = other.dims;
+		sub_dims = other.sub_dims;
+		storage = other.storage;
+		element_stride = other.element_stride;
+		owner = other.owner;
+		other.owner = false;
+		return *this;
+	}
+
+	virtual ~AVArray() noexcept
 	{
 		if (owner)
 		{
@@ -126,7 +160,19 @@ public:
 		return storage[offset];
 	}
 
+	inline ValueType& data(int i)
+	{
+		return storage[i];
+	}
+
+	inline const ValueType& data(int i) const
+	{
+		return storage[i];
+	}
+
 	inline Shape shape() const { return dims; }
+
+	inline int size() const { return element_stride*dims[0]; }
 };
 
 template<typename T>
@@ -155,11 +201,48 @@ public:
 		storage(location), element_stride(1), owner(false)
 	{}
 
-	AVArray(const AVArray &other) = default;
-	AVArray(AVArray &&other) = default;
-	AVArray& operator=(const AVArray &other) = default;
-	AVArray& operator=(AVArray &&other) = default;
-	~AVArray()
+	AVArray(Shape new_dims) : dims(new_dims),
+		storage(new ValueType[new_dims[0]]), element_stride(1), owner(true)
+	{}
+
+	AVArray(const AVArray &other) : dims(other.dims),
+		storage(new ValueType[other.dims[0]]),
+		element_stride(other.element_stride), owner(true)
+	{
+		for (int i = 0; i < dims[0]; ++i)
+		{
+			storage[i] = other.storage[i];
+		}
+	}
+
+	AVArray(AVArray &&other) : dims(other.dims),
+		storage(other.storage), element_stride(other.element_stride), owner(other.owner)
+	{
+		other.owner = false;
+	}
+
+	AVArray& operator=(const AVArray &other)
+	{
+		AVArray temp(other);
+		*this = std::move(temp);
+		return this;
+	}
+
+	AVArray& operator=(AVArray &&other)
+	{
+		if (owner)
+		{
+			delete[] storage;
+		}
+		dims = other.dims;
+		storage = other.storage;
+		element_stride = other.element_stride;
+		owner = other.owner;
+		other.owner = false;
+		return *this;
+	}
+
+	virtual ~AVArray() noexcept
 	{
 		if (owner)
 		{
@@ -191,7 +274,19 @@ public:
 		return storage[i];
 	}
 
+	inline ValueType& data(int i)
+	{
+		return storage[i];
+	}
+
+	inline const ValueType& data(int i) const
+	{
+		return storage[i];
+	}
+
 	inline Shape shape() const { return dims; }
+
+	inline int size() const { return element_stride*dims[0]; }
 };
 
 #endif // AV_ARRAY_HPP
