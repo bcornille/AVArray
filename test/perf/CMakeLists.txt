@@ -1,6 +1,6 @@
 add_subdirectory(googlebenchmark)
 
-include_directories(${PROJECT_SOURCE_DIR}/include googlebenchmark/include ~/usr/include)
+include_directories(${PROJECT_SOURCE_DIR}/include googlebenchmark/include)
 
 foreach(target looping matmult sum)
 	add_executable(${target} ${target}.cpp ${PROJECT_SOURCE_DIR}/include/AVArray/AVArray.hpp googlebenchmark/include/benchmark/benchmark.h)

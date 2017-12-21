@@ -41,9 +41,6 @@ struct TakeSlice
 template<boost::yap::expr_kind Kind, typename Tuple>
 struct TensorExpr
 {
-	// static_assert(
-	// 	Kind != boost::yap::expr_kind::terminal ||
-	// 	std::is_same<Tuple, boost::hana::tuple<AVArray>);
 
 	static constexpr boost::yap::expr_kind kind = Kind;
 

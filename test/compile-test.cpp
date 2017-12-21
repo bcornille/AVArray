@@ -27,13 +27,13 @@ int main(int argc, char const *argv[])
 		}
 	}
 
-	mat_c = 1.0 / mat_a * mat_b;
+	mat_c = 3.0*( mat_a + mat_b ) + mat_a;
 
 	for (int i = 0; i < N; ++i)
 	{
 		for (int j = 0; j < N; ++j)
 		{
-			mat_d[i][j] = 1.0 / mat_a[i][j] * mat_b[i][j];
+			mat_d[i][j] = 4.0*mat_a[i][j] + 3.0*mat_b[i][j];
 		}
 	}
 

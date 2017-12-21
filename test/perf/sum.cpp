@@ -33,6 +33,32 @@ static void pointer(benchmark::State& state)
 }
 BENCHMARK(pointer)->Range(8, 1<<10);
 
+static void array_bracket(benchmark::State& state)
+{
+	for(auto _ : state) {
+		int N = state.range(0);
+		AVArray<double, 2> mat_a(N, N), mat_b(N, N), mat_c(N, N);
+
+		for (int i = 0; i < N; ++i)
+		{
+			for (int j = 0; j < N; ++j)
+			{
+				mat_a[i][j] = i;
+				mat_b[i][j] = j;
+			}
+		}
+
+		for (int i = 0; i < N; ++i)
+		{
+			for (int j = 0; j < N; ++j)
+			{
+				mat_c[i][j] = mat_a[i][j] + mat_b[i][j];
+			}
+		}
+	}
+}
+BENCHMARK(array_bracket)->Range(8, 1<<10);
+
 static void tensor_bracket(benchmark::State& state)
 {
 	for(auto _ : state) {
