@@ -24,17 +24,23 @@ int main(int argc, char const *argv[])
 		{
 			mat_a[i][j] = i + 1;
 			mat_b[i][j] = j + 1;
+			mat_c[i][j] = 0;
+			mat_d[i][j] = 0;
 		}
 	}
 
-	mat_c = 1.0 / mat_a * mat_b;
+	mat_c = mat_a.innerProduct(mat_b);
 
 	for (int i = 0; i < N; ++i)
 	{
 		for (int j = 0; j < N; ++j)
 		{
-			mat_d[i][j] = 1.0 / mat_a[i][j] * mat_b[i][j];
+			for (int k = 0; k < N; ++k)
+			{
+				mat_d[i][k] += mat_a[i][j] * mat_b[j][k];
+			}
 		}
+			
 	}
 
 	for (int i = 0; i < N; ++i)

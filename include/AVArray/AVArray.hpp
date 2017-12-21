@@ -50,6 +50,15 @@ private:
 		return stride;
 	}
 
+	inline int getSize(Shape in_shape) const
+	{
+		int stride = 1;
+		for(auto&& i : in_shape) {
+			stride *= i;
+		}
+		return stride;
+	}
+
 public:
 	AVArray() : dims{0}, sub_dims{0}, storage(nullptr), element_stride(0),
 		owner(false)
@@ -63,6 +72,21 @@ public:
 		static_assert(1 + sizeof...(nD) == D,
 			"Dimension of variadic constructor is wrong.");
 		assert(mult(n1, nD...) > 0);
+	}
+
+	AVArray(Shape new_dims) : dims(new_dims), sub_dims(makeSubShape(new_dims)),
+		storage(new ValueType[getSize(new_dims)]),
+		element_stride(getStride(sub_dims)), owner(true)
+	{}
+
+	AVArray(Shape new_dims, T value) : dims(new_dims), sub_dims(makeSubShape(new_dims)),
+		storage(new ValueType[getSize(new_dims)]),
+		element_stride(getStride(sub_dims)), owner(true)
+	{
+		for (int i = 0; i < size(); ++i)
+		{
+			storage[i] = value;
+		}
 	}
 
 	AVArray(ValueType* location, Shape new_dims) : dims(new_dims),
@@ -204,6 +228,15 @@ public:
 	AVArray(Shape new_dims) : dims(new_dims),
 		storage(new ValueType[new_dims[0]]), element_stride(1), owner(true)
 	{}
+
+	AVArray(Shape new_dims, T value) : dims(new_dims),
+		storage(new ValueType[new_dims[0]]), element_stride(1), owner(true)
+	{
+		for (int i = 0; i < size(); ++i)
+		{
+			storage[i] = value;
+		}
+	}
 
 	AVArray(const AVArray &other) : dims(other.dims),
 		storage(new ValueType[other.dims[0]]),
