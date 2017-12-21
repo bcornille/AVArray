@@ -25,6 +25,7 @@ static void pointer(benchmark::State& state)
 				mat_c[i*N+j] = mat_a[i*N+j] + mat_b[i*N+j];
 			}
 		}
+		benchmark::DoNotOptimize(mat_c);
 
 		delete[] mat_a;
 		delete[] mat_b;
@@ -55,6 +56,7 @@ static void array_bracket(benchmark::State& state)
 				mat_c[i][j] = mat_a[i][j] + mat_b[i][j];
 			}
 		}
+		benchmark::DoNotOptimize(&mat_c.data(0));
 	}
 }
 BENCHMARK(array_bracket)->Range(8, 1<<10);
@@ -81,6 +83,7 @@ static void tensor_bracket(benchmark::State& state)
 				mat_c[i][j] = mat_a[i][j] + mat_b[i][j];
 			}
 		}
+		benchmark::DoNotOptimize(&mat_c[0][0]);
 	}
 }
 BENCHMARK(tensor_bracket)->Range(8, 1<<10);
@@ -101,6 +104,7 @@ static void tensor(benchmark::State& state)
 		}
 
 		mat_c = 2.0*mat_a + mat_b;
+		benchmark::DoNotOptimize(&mat_c[0][0]);
 	}
 }
 BENCHMARK(tensor)->Range(8, 1<<10);
@@ -128,6 +132,7 @@ static void tensor_bracket_3(benchmark::State& state)
 				mat_d[i][j] = mat_a[i][j] + mat_b[i][j] + mat_c[i][j];
 			}
 		}
+		benchmark::DoNotOptimize(&mat_d[0][0]);
 	}
 }
 BENCHMARK(tensor_bracket_3)->Range(8, 1<<10);
@@ -149,6 +154,7 @@ static void tensor_3(benchmark::State& state)
 		}
 
 		mat_d = mat_a + mat_b + mat_c;
+		benchmark::DoNotOptimize(&mat_d[0][0]);
 	}
 }
 BENCHMARK(tensor_3)->Range(8, 1<<10);
