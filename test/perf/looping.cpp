@@ -20,6 +20,33 @@ static void pointer(benchmark::State& state)
 }
 BENCHMARK(pointer)->Range(8, 1<<10);
 
+static void double_pointer(benchmark::State& state)
+{
+	for(auto _ : state) {
+		int N = state.range(0);
+		double** array_2d = new double*[N];
+		for (int i = 0; i < N; ++i)
+		{
+			array_2d[i] = new double[N];
+		}
+
+		for (int i = 0; i < N; ++i)
+		{
+			for (int j = 0; j < N; ++j)
+			{
+				array_2d[i][j] = i*j;
+			}
+		}
+		benchmark::DoNotOptimize(array_2d);
+		for (int i = 0; i < N; ++i)
+		{
+			delete[] array_2d[i];
+		}
+		delete[] array_2d;
+	}
+}
+BENCHMARK(double_pointer)->Range(8, 1<<10);
+
 static void bracket_operator(benchmark::State& state)
 {
 	for(auto _ : state) {
