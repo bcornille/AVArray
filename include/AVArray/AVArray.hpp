@@ -139,7 +139,7 @@ public:
 		for (int i = 1; i < D; ++i)
 		{
 			assert(indices[i] < dims[i]);
-			offset = offset*dims[i] + indices[i];
+			offset = offset*dims[i-1] + indices[i];
 		}
 		return storage[offset];
 	}
